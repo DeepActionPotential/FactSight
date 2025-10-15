@@ -85,7 +85,7 @@
 3. **Download required models from [HUGGINGFACE](<https://huggingface.co/spaces/DeepActionPotential/FactSight/tree/main/models>)** (if not included)
    ```bash
    # Models will be automatically downloaded on first run
-   # or placed in the models/ directory
+   # If not found, you should download it from HUGGINGFACE
    ```
 
 4. **Configure environment**
