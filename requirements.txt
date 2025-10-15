@@ -1,0 +1,13 @@
+numpy==2.3.3
+scikit-learn==1.7.1
+joblib==1.5.2
+onnxruntime==1.22.1
+timm==1.0.15
+torch==2.8.0
+torchvision==0.23.0
+Pillow==11.3.0
+scrfd==0.3.0
+nltk==3.9.1
+contractions==0.1.73
+transformers==4.57.0
+flask==3.1.1

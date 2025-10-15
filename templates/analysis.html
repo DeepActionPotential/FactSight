@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Analysis Results</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <main class="analysis-form-section">
+    <div class="container">
+      <div class="form-container">
+        <!-- compact header inside the card -->
+        <div class="form-header form-header-inline">
+          <div class="inline-left">
+            <a href="{{ url_for('index') }}" class="back-button">Back</a>
+            <h2>Analysis Results</h2>
+          </div>
+          <div class="analysis-meta">
+            <span class="analysis-id">ID: {{ analysis.analysis_id }}</span>
+            <span class="analysis-time">{{ analysis.analysis_timestamp }}</span>
+          </div>
+        </div>
+
+        <section class="analysis-card-block">
+          <!-- Final Decision -->
+          <div class="overview-cards">
+            <div class="overview-card {{ 'card-danger' if analysis.is_fake_final_decision else 'card-success' }}">
+              <div class="card-content">
+                <h3>Final Decision</h3>
+                <div class="card-value">
+                  {{ 'Fake' if analysis.is_fake_final_decision else 'Not Fake' }}
+                </div>
+                <div class="card-description">Overall verdict based on aggregated checks</div>
+              </div>
+            </div>
+
+            <div class="overview-card {{ 'card-warning' if analysis.is_ai_text else 'card-success' }}">
+              <div class="card-content">
+                <h3>Text Origin</h3>
+                <div class="card-value">{{ 'AI Generated' if analysis.is_ai_text else 'Human Written' }}</div>
+                <div class="card-description">Content authenticity analysis</div>
+              </div>
+            </div>
+
+            <div class="overview-card {{ 'card-danger' if analysis.is_fake_text else 'card-success' }}">
+              <div class="card-content">
+                <h3>Text Authenticity</h3>
+                <div class="card-value">{{ 'Likely Fake' if analysis.is_fake_text else 'Possibly Real' }}</div>
+                <div class="card-description">Fact verification of text</div>
+              </div>
+            </div>
+
+            <div class="overview-card">
+              <div class="card-content">
+                <h3>Images Analyzed</h3>
+                <div class="card-value">{{ analysis.images|length }}</div>
+                <div class="card-description">
+                  {{ analysis.images|selectattr('is_ai_image')|list|length }} AI flagged
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Grid -->
+          <div class="dashboard-grid">
+            <div class="dashboard-column">
+              <!-- Original Content -->
+              <section class="analysis-section">
+                <div class="section-header">
+                  <h3>Original Content</h3>
+                  <span class="section-badge">Submitted Text</span>
+                </div>
+                <div class="content-card">
+                  <div class="content-text">{{ analysis.text }}</div>
+                  <div class="content-meta">
+                    <span>{{ analysis.text|length }} characters</span>
+                    <span>{{ analysis.text.split()|length }} words</span>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Emotion Analysis -->
+              {% if analysis.emotion %}
+              <section class="analysis-section">
+                <div class="section-header">
+                  <h3>Emotion Analysis</h3>
+                  <span class="section-badge">{{ (analysis.emotion.confidence * 100)|round|int }}% confidence</span>
+                </div>
+                <div class="emotion-card">
+                  <div class="dominant-emotion">
+                    <strong>Dominant Emotion:</strong>
+                    <span class="emotion-tag">{{ analysis.emotion.dominant_emotion|title }}</span>
+                  </div>
+                  <div class="emotion-breakdown">
+                    {% for emotion, score in analysis.emotion.all_scores.items() %}
+                    <div class="emotion-item">
+                      <span class="emotion-label">{{ emotion|title }}</span>
+                      <div class="emotion-bar">
+                        <div class="emotion-fill" style="width: {{ score * 100 }}%"></div>
+                      </div>
+                      <span class="emotion-score">{{ (score * 100)|round|int }}%</span>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </section>
+              {% endif %}
+
+              <!-- Search Queries -->
+              <section class="analysis-section">
+                <div class="section-header">
+                  <h3>Generated Search Queries</h3>
+                  <span class="section-badge">{{ analysis.queries|length }} queries</span>
+                </div>
+                <div class="queries-card">
+                  <div class="queries-grid">
+                    {% for query in analysis.queries %}
+                    <div class="query-chip">{{ query }}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="dashboard-column">
+              <!-- Fact Check Results -->
+              {% if analysis.fact_check %}
+              <section class="analysis-section">
+                <div class="section-header">
+                  <h3>Fact Check Results</h3>
+                  <span class="section-badge">{{ analysis.fact_check|length }} checks</span>
+                </div>
+                <div class="fact-checks">
+                  {% for check in analysis.fact_check %}
+                  <div class="fact-check-card {{ 'fact-unverified' if not check.verified else 'fact-verified' }}">
+                    <div class="fact-check-header">
+                      <div class="fact-verdict">{{ check.summary_verdict }}</div>
+                      <div class="fact-status {{ 'status-unverified' if not check.verified else 'status-verified' }}">
+                        {{ 'Unverified' if not check.verified else 'Verified' }}
+                      </div>
+                    </div>
+                    <div class="fact-check-results">
+                      {% for result in check.results %}
+                      <div class="fact-item">
+                        <div class="fact-source">
+                          <strong>{{ result.publisher }}</strong>
+                          {% if result.claim_date %}
+                          <span class="claim-date">{{ result.claim_date }}</span>
+                          {% endif %}
+                        </div>
+                        <div class="fact-details">
+                          <div class="fact-text">{{ result.text }}</div>
+                          <div class="fact-rating {{ (result.rating or '').lower() }}">{{ result.rating }}</div>
+                        </div>
+                        {% if result.url %}
+                        <a href="{{ result.url }}" target="_blank" class="fact-link">View Source</a>
+                        {% endif %}
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </section>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Uploaded Images with Overlays -->
+          <section class="analysis-section">
+            <div class="section-header">
+              <h3>Uploaded Images</h3>
+              <span class="section-badge">{{ analysis.images|length }} items</span>
+            </div>
+            <div class="uploaded-images-grid">
+              {% for image in analysis.images %}
+              <div class="vision-card">
+                <div class="vision-header">
+                  <strong>Image {{ loop.index }}</strong>
+                  <span class="image-type {{ 'ai-image' if image.is_ai_image else 'real-image' }}">
+                    {{ 'AI Generated' if image.is_ai_image else 'Real Photo' }}
+                  </span>
+                </div>
+                <div class="image-canvas-wrap">
+                  {% if image.image_path %}
+                    <img
+                      src="{{ image.image_path }}"
+                      alt="Uploaded image {{ loop.index }}"
+                      class="image-with-overlay"
+                      data-index="{{ loop.index0 }}"
+                    />
+                    <canvas class="overlay-canvas" data-index="{{ loop.index0 }}"></canvas>
+                  {% else %}
+                    <div class="no-image">Image file unavailable.</div>
+                  {% endif %}
+                </div>
+                <div class="faces-count">Faces detected: {{ image.faces|length }}</div>
+              </div>
+              {% endfor %}
+            </div>
+          </section>
+
+          <!-- Export Section -->
+          <section class="export-section">
+            <div class="export-actions">
+              <button class="export-btn" id="exportJson">Export JSON</button>
+              <button class="export-btn" id="shareAnalysis">Share Link</button>
+            </div>
+          </section>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Provide analysis JSON to JS for overlay drawing -->
+  <script id="analysis-data" type="application/json">{{ analysis|tojson }}</script>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script>
+    document.getElementById('exportJson')?.addEventListener('click', () => {
+      const data = {{ analysis|tojson }};
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `analysis_{{ analysis.analysis_id }}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
+
+    document.getElementById('shareAnalysis')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Analysis link copied to clipboard.');
+      } catch {
+        alert('Copy failed. You can share the URL from the address bar.');
+      }
+    });
+  </script>
+</body>
+</html>

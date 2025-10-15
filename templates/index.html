@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>News Analyzer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- header removed per request -->
+
+  <main class="analysis-form-section">
+    <div class="container">
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Analyze News Content</h2>
+          <p>Paste the article and attach related images.</p>
+        </div>
+
+        <form id="newsForm" class="news-form">
+          <div class="form-group">
+            <label for="newsText" class="form-label">
+              News Content
+              <span class="char-counter" id="charCounter">0/10000</span>
+            </label>
+            <textarea
+              id="newsText"
+              class="form-textarea"
+              placeholder="Paste or type the news content you want to analyze..."
+              maxlength="10000"
+              spellcheck="false"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">News Images</label>
+            <div class="upload-container">
+              <div class="upload-zone" id="uploadArea">
+                <div class="upload-content">
+                  <div class="upload-text">
+                    <h4>Drop images here</h4>
+                    <p>or click to browse files</p>
+                    <span class="upload-info">Supports JPG, PNG, WebP • Max 10MB per image</span>
+                  </div>
+                  <button type="button" class="upload-btn" id="browseBtn">
+                    Select Images
+                  </button>
+                </div>
+                <input type="file" id="fileInput" multiple accept="image/*" class="file-input"/>
+              </div>
+
+              <div class="image-previews" id="imagePreviews"></div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" id="clearBtn">Clear</button>
+            <button type="submit" class="btn-primary" id="analyzeBtn">
+              <span class="btn-text">Analyze News</span>
+              <div class="btn-loader" id="btnLoader"><div class="spinner"></div></div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <div class="message-container" id="messageContainer"></div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
