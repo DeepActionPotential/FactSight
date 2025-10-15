@@ -1,13 +1,3 @@
----
-title: FactSight
-emoji: 🚀
-colorFrom: blue
-colorTo: purple
-sdk: docker 
-# Optional: You can specify the port if it's not the default 7860
-# app_port: 7860 
----
-
 
 # FactSight: Advanced Fake News Detection System
 
