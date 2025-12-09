@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 import os
 
 
-
 @dataclass
 class FlaskConfig:
     """Flask application configuration."""
