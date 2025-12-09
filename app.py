@@ -8,6 +8,7 @@ import io
 from datetime import datetime
 from PIL import Image
 
+
 # Import configuration
 from config import general_config
 
